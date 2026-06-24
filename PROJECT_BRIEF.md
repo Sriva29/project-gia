@@ -9,6 +9,13 @@ The differentiators are deliberately visible in the product:
 - Concise, evidence-backed **business intelligence briefings** written for a store or merchandising leader rather than for an engineer.
 - A **human feedback loop**: users critique recommendations; the system retrieves relevant prior feedback on later runs and adjusts its reasoning. This is retrieval/prompt memory, not model training.
 
+### Team ownership
+
+| Builder | Primary responsibility |
+| --- | --- |
+| Srivatsan Rangarajan | Agent logic, LlamaIndex orchestration, MCP servers, structured recommendations, and evaluation |
+| Beula | DynamoDB and PostgreSQL/pgvector, ETL, data quality, Slack, and dashboard integrations |
+
 ### Scope guardrails
 
 - Phase 1 uses synthetic, non-sensitive data only. Do not ingest customer PII.
@@ -136,7 +143,7 @@ Keep shared request/response schemas in `packages/shared`; do not duplicate Dyna
 
 Establish a reproducible local development environment; load grocery inventory/sales data into DynamoDB; and generate validated slow-mover, reorder-point, and clearance recommendations as JSON and CSV. No Slack, dashboard, or feedback retrieval yet.
 
-## Person A — agent logic, MCP, orchestration
+## Srivatsan — agent logic, MCP, orchestration
 
 - [ ] Define versioned Pydantic/JSON schemas for `InventorySnapshot`, `SalesDaily`, `Recommendation`, `RunMetadata`, and calculation inputs/outputs in `packages/shared`.
 - [ ] Build the Inventory MCP server with read-only tools: `get_sku_inventory`, `get_sales_history`, `list_store_skus`, and `get_data_freshness`. Require explicit store/SKU/date-window inputs and return typed results.
@@ -146,7 +153,7 @@ Establish a reproducible local development environment; load grocery inventory/s
 - [ ] Add an `agent run` CLI accepting `--store`, `--as-of-date`, and `--output-dir`; write `recommendations.json`, `recommendations.csv`, and `run-metadata.json`.
 - [ ] Unit-test calculators and schema validation; add at least one agent integration test using fixtures and a mocked model response.
 
-## Person B — data infrastructure and ETL
+## Beula — data infrastructure and ETL
 
 - [ ] Write the data dictionary and source-file contracts for SKU master, inventory snapshots, and daily sales. Include required columns, allowed nulls, units, dates, and quality checks.
 - [ ] Design and provision DynamoDB Local schema plus infrastructure definition for the optional AWS demo table.
@@ -162,10 +169,10 @@ Establish a reproducible local development environment; load grocery inventory/s
 
 ## Dependencies and handoffs
 
-1. Agree on shared schemas and calculator parameter names before either implementation begins (A + B).
-2. B publishes fixture CSVs, Dynamo access patterns, and load manifest contract; A can then build MCP tool contracts against those fixtures.
-3. A provides exact read patterns and projected attributes; B confirms the DynamoDB design serves them without scans for normal agent runs.
-4. B’s seeded dataset and A’s structured-result contract are required before end-to-end acceptance.
+1. Agree on shared schemas and calculator parameter names before either implementation begins (Srivatsan + Beula).
+2. Beula publishes fixture CSVs, Dynamo access patterns, and load manifest contract; Srivatsan can then build MCP tool contracts against those fixtures.
+3. Srivatsan provides exact read patterns and projected attributes; Beula confirms the DynamoDB design serves them without scans for normal agent runs.
+4. Beula’s seeded dataset and Srivatsan’s structured-result contract are required before end-to-end acceptance.
 
 ## Acceptance criteria — done when
 
@@ -209,7 +216,7 @@ data/fixtures/       docs/{adr,data-dictionary.md}
 
 Capture human judgment on each recommendation, embed that feedback in pgvector, retrieve relevant prior feedback for future agent runs, and prove that retrieved feedback materially improves recommendation quality on a held-out evaluation set.
 
-## Person A — agent logic, MCP, orchestration
+## Srivatsan — agent logic, MCP, orchestration
 
 - [ ] Define the feedback-aware run policy: retrieve before final explanation/ranking; use feedback as advisory context; never override current numeric evidence solely because of a past comment.
 - [ ] Build the Feedback MCP server tools: `submit_feedback`, `search_similar_feedback`, `get_recommendation_feedback`, and `record_evaluation`.
@@ -219,7 +226,7 @@ Capture human judgment on each recommendation, embed that feedback in pgvector, 
 - [ ] Create a regression/evaluation harness comparing baseline vs. feedback-aware output on a frozen, labelled scenario set. Define metrics before tuning prompts.
 - [ ] Add adversarial tests: irrelevant feedback, contradictory feedback, a single reviewer’s repeated preference, stale feedback, and feedback asking the model to ignore evidence.
 
-## Person B — data infrastructure and feedback ingestion
+## Beula — data infrastructure and feedback ingestion
 
 - [ ] Create PostgreSQL migrations for `recommendations`, `feedback`, `feedback_embeddings`, `agent_runs`, and `evaluation_results`; use UUID keys and foreign keys to recommendation/run records.
 - [ ] Enable pgvector and create a vector index appropriate to the chosen embedding dimension and expected local data volume.
@@ -232,8 +239,8 @@ Capture human judgment on each recommendation, embed that feedback in pgvector, 
 ## Dependencies and handoffs
 
 1. Phase 1 recommendation IDs and evidence schema must be stable enough to reference from feedback.
-2. A defines retrieval metadata and evaluation labels; B implements columns, indexes, and filtered-query support.
-3. B provides seeded feedback and deterministic retrieval fixtures; A supplies the evaluation harness and prompt policy.
+2. Srivatsan defines retrieval metadata and evaluation labels; Beula implements columns, indexes, and filtered-query support.
+3. Beula provides seeded feedback and deterministic retrieval fixtures; Srivatsan supplies the evaluation harness and prompt policy.
 4. Both agree on a small labelled set of “better after feedback” cases before claiming improvement.
 
 ## Acceptance criteria — done when
@@ -275,7 +282,7 @@ tests/fixtures/feedback/     docs/evaluation-plan.md
 
 Turn structured recommendations into clear daily briefings, distribute a succinct alert to Slack, and provide a small dashboard for browsing recommendations, evidence, reasoning, confidence, and feedback.
 
-## Person A — agent logic, MCP, orchestration
+## Srivatsan — agent logic, MCP, orchestration
 
 - [ ] Create a briefing-generation workflow that groups recommendations into: urgent stock risk, slow-moving/clearance opportunities, and watch list. It must be grounded in the structured records generated earlier.
 - [ ] Define a narrative style guide: executive voice, headline first, specific action/owner/timeframe, evidence in plain language, uncertainty disclosed, no invented financial impact.
@@ -284,7 +291,7 @@ Turn structured recommendations into clear daily briefings, distribute a succinc
 - [ ] Implement a scheduled orchestration entry point that is idempotent by store/date, prevents duplicate Slack publication, and captures run status.
 - [ ] Add a sparse optional Claude final-synthesis adapter behind `ENABLE_CLAUDE=false` by default, including hard token limits and a local-model fallback. It must never be required by tests or demos.
 
-## Person B — integrations and dashboard
+## Beula — integrations and dashboard
 
 - [ ] Create a Slack app/webhook for a dedicated demo channel; store webhook/token only in environment configuration. Format alerts with top actions, confidence, and a dashboard link.
 - [ ] Build a minimal dashboard (for example FastAPI + server-rendered pages, or a small React/Vite client backed by FastAPI). Favor a fast, maintainable stack over polished animation.
@@ -297,9 +304,9 @@ Turn structured recommendations into clear daily briefings, distribute a succinc
 ## Dependencies and handoffs
 
 1. Phases 1–2 must expose stable recommendation, feedback trace, and run-status schemas.
-2. A supplies the briefing contract and output events; B supplies Slack/dashboard endpoint contracts and URLs.
-3. B’s feedback UI reuses Phase 2 validation and API—not a separate storage route.
-4. A owns content correctness; B owns delivery/display correctness. Review a shared end-to-end demo before merging.
+2. Srivatsan supplies the briefing contract and output events; Beula supplies Slack/dashboard endpoint contracts and URLs.
+3. Beula’s feedback UI reuses Phase 2 validation and API—not a separate storage route.
+4. Srivatsan owns content correctness; Beula owns delivery/display correctness. Review a shared end-to-end demo before merging.
 
 ## Acceptance criteria — done when
 
@@ -342,7 +349,7 @@ tests/integration/slack/ tests/ui/
 
 Make the project easy to run, credible to review, visually demonstrable, and resilient under a realistic synthetic workload. Package the story as an engineering portfolio piece, not merely a prototype.
 
-## Person A — agent quality and technical narrative
+## Srivatsan — agent quality and technical narrative
 
 - [ ] Expand the synthetic scenario/evaluation set: regular movers, slow movers, demand spikes, stockouts, supplier lead-time changes, promotions, seasonal products, and conflicting reviewer feedback.
 - [ ] Tune prompts and deterministic ranking only against the frozen evaluation plan; document trade-offs and regression results.
@@ -351,7 +358,7 @@ Make the project easy to run, credible to review, visually demonstrable, and res
 - [ ] Write ADRs for DynamoDB design, pgvector/RAG approach, confidence semantics, local-first model decision, and optional paid-synthesis boundary.
 - [ ] Identify the churn-analysis extension seams (data contracts, tools, recommendation types) and document them without implementing churn scope.
 
-## Person B — performance, reliability, and portfolio packaging
+## Beula — performance, reliability, and portfolio packaging
 
 - [ ] Generate reproducible, seeded synthetic datasets at several sizes; include a data generator and scenario manifest rather than committing huge files.
 - [ ] Benchmark ETL, DynamoDB reads, vector retrieval, agent run, and dashboard load. Capture baseline results and address the largest obvious bottleneck.
@@ -363,7 +370,7 @@ Make the project easy to run, credible to review, visually demonstrable, and res
 ## Dependencies and handoffs
 
 1. Phase 3’s end-to-end path must be stable before performance work; benchmark a tagged baseline.
-2. A defines evaluation and portfolio story; B makes the runnable demo, CI, and performance claims reproducible.
+2. Srivatsan defines evaluation and portfolio story; Beula makes the runnable demo, CI, and performance claims reproducible.
 3. Both conduct a fresh-clone demo rehearsal and record every manual step as either documentation or an issue.
 
 ## Acceptance criteria — done when
