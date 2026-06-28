@@ -56,6 +56,8 @@ flowchart LR
 
 ### Recommendation contract
 
+The detailed Phase 1 inventory input/output contracts, deterministic inventory policy, and acceptance criteria are maintained in [`docs/contracts/inventory_mvp_contract.md`](docs/contracts/inventory_mvp_contract.md).
+
 Every recommendation should be a structured record before it becomes prose:
 
 ```json

@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory MVP Contract Explainer</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5b6575;
+      --line: #d7dde8;
+      --paper: #f8fafc;
+      --panel: #ffffff;
+      --blue: #2563eb;
+      --green: #15803d;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --teal: #0f766e;
+      --violet: #6d28d9;
+      --shadow: 0 14px 35px rgba(23, 32, 51, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 20px;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      overflow: auto;
+    }
+
+    .brand {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.12;
+    }
+
+    h1 {
+      font-size: 64px;
+      max-width: 940px;
+    }
+
+    h2 {
+      font-size: 30px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    nav a {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    nav a:hover {
+      background: #eef5ff;
+      text-decoration: none;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    section {
+      padding: 52px clamp(20px, 5vw, 72px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero {
+      min-height: 82vh;
+      display: grid;
+      align-content: center;
+      gap: 30px;
+      color: #ffffff;
+      background:
+        linear-gradient(120deg, rgba(12, 29, 59, 0.92), rgba(15, 118, 110, 0.82)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Crect width='1400' height='900' fill='%23dfe9f3'/%3E%3Cg opacity='0.82'%3E%3Crect x='95' y='120' width='190' height='560' rx='10' fill='%23ffffff'/%3E%3Crect x='322' y='120' width='190' height='560' rx='10' fill='%23ffffff'/%3E%3Crect x='549' y='120' width='190' height='560' rx='10' fill='%23ffffff'/%3E%3Crect x='776' y='120' width='190' height='560' rx='10' fill='%23ffffff'/%3E%3Crect x='1003' y='120' width='190' height='560' rx='10' fill='%23ffffff'/%3E%3C/g%3E%3Cg opacity='0.86'%3E%3Crect x='118' y='170' width='145' height='36' fill='%23a7f3d0'/%3E%3Crect x='118' y='232' width='122' height='36' fill='%23fde68a'/%3E%3Crect x='118' y='294' width='150' height='36' fill='%23bfdbfe'/%3E%3Crect x='346' y='170' width='130' height='36' fill='%23fecaca'/%3E%3Crect x='346' y='232' width='146' height='36' fill='%23bfdbfe'/%3E%3Crect x='346' y='294' width='118' height='36' fill='%23a7f3d0'/%3E%3Crect x='572' y='170' width='146' height='36' fill='%23fde68a'/%3E%3Crect x='572' y='232' width='108' height='36' fill='%23fecaca'/%3E%3Crect x='572' y='294' width='151' height='36' fill='%23a7f3d0'/%3E%3Crect x='800' y='170' width='126' height='36' fill='%23bfdbfe'/%3E%3Crect x='800' y='232' width='148' height='36' fill='%23a7f3d0'/%3E%3Crect x='800' y='294' width='118' height='36' fill='%23fde68a'/%3E%3Crect x='1027' y='170' width='128' height='36' fill='%23fecaca'/%3E%3Crect x='1027' y='232' width='148' height='36' fill='%23fde68a'/%3E%3Crect x='1027' y='294' width='110' height='36' fill='%23bfdbfe'/%3E%3C/g%3E%3Cpath d='M78 725H1260' stroke='%2394a3b8' stroke-width='20' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero p {
+      max-width: 850px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.14);
+      font-weight: 750;
+    }
+
+    .button.primary {
+      color: #0f172a;
+      background: #ffffff;
+    }
+
+    .button:hover {
+      text-decoration: none;
+      transform: translateY(-1px);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      min-height: 132px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stat strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr 44px 1fr 44px 1fr;
+      gap: 14px;
+      align-items: stretch;
+      margin-top: 22px;
+    }
+
+    .flow-node {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--blue);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .flow-node:nth-child(3) {
+      border-top-color: var(--amber);
+    }
+
+    .flow-node:nth-child(5) {
+      border-top-color: var(--green);
+    }
+
+    .arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .plain {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .plain li {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: #ffffff;
+      background: var(--teal);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .contracts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .contract-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .contract-card code,
+    .pill,
+    .formula code,
+    table code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .contract-card .tag {
+      display: inline-flex;
+      margin-bottom: 12px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: #ffffff;
+      background: var(--violet);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #334155;
+      background: #eef2f7;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .policy-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .policy {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .policy.slow {
+      border-top: 5px solid var(--amber);
+    }
+
+    .policy.reorder {
+      border-top: 5px solid var(--red);
+    }
+
+    .policy.clearance {
+      border-top: 5px solid var(--green);
+    }
+
+    .policy ul,
+    .panel ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .formula-stack {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .formula {
+      padding: 14px;
+      border-left: 5px solid var(--blue);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .controls {
+      display: grid;
+      gap: 16px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: #334155;
+      font-weight: 750;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+    }
+
+    .range-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .result {
+      min-height: 116px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .result strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 26px;
+    }
+
+    .decision {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 8px;
+      color: #ffffff;
+      background: var(--ink);
+    }
+
+    .decision strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .question {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .question strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1040px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .summary-grid,
+      .policy-grid,
+      .contracts,
+      .two-col,
+      .calculator,
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        min-height: 24px;
+        transform: rotate(90deg);
+      }
+    }
+
+    @media (max-width: 640px) {
+      section {
+        padding: 34px 16px;
+      }
+
+      nav {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: 72vh;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .results {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="eyebrow">Project Gia</span>
+        <h3>Inventory MVP Contract</h3>
+        <p>Visual guide for reviewing the Phase 1 contract.</p>
+      </div>
+      <nav aria-label="Page sections">
+        <a href="#overview">Overview</a>
+        <a href="#flow">Data Flow</a>
+        <a href="#records">Records</a>
+        <a href="#policies">Policies</a>
+        <a href="#formulas">Formulas</a>
+        <a href="#calculator">Try a Scenario</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#feedback">Feedback Prompts</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="hero" id="overview">
+        <span class="eyebrow">Phase 1 shared contract</span>
+        <h1>From store facts to inventory recommendations</h1>
+        <p>
+          This page translates the markdown contract into a reviewable map. It shows what data enters the system,
+          which deterministic calculations happen, and what the agent is allowed to output.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#flow">Start with the flow</a>
+          <a class="button" href="inventory_mvp_contract.md">Open source markdown</a>
+        </div>
+      </section>
+
+      <section>
+        <div class="summary-grid" aria-label="Contract summary">
+          <div class="stat">
+            <strong>2</strong>
+            <span>Primary input records: inventory snapshots and daily sales rows.</span>
+          </div>
+          <div class="stat">
+            <strong>3</strong>
+            <span>Policy decisions: slow mover, reorder, and clearance.</span>
+          </div>
+          <div class="stat">
+            <strong>28</strong>
+            <span>Default lookback days for sales velocity and data completeness.</span>
+          </div>
+          <div class="stat">
+            <strong>0</strong>
+            <span>Metrics the LLM may invent. Numbers must come from source data or calculators.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="flow">
+        <h2>Data Flow</h2>
+        <p>The contract is a handoff agreement. It keeps data loading, MCP tools, deterministic policy logic, and final output aligned.</p>
+        <div class="flow" aria-label="Inventory contract flow">
+          <div class="flow-node">
+            <h3>1. Source Facts</h3>
+            <p>One current inventory snapshot and 28 daily sales rows for each store and SKU.</p>
+          </div>
+          <div class="arrow">></div>
+          <div class="flow-node">
+            <h3>2. Deterministic Calculator</h3>
+            <p>Computes velocity, days of supply, reorder point, reorder quantity, and clearance eligibility.</p>
+          </div>
+          <div class="arrow">></div>
+          <div class="flow-node">
+            <h3>3. Structured Output</h3>
+            <p>Writes recommendation records with evidence, reasoning, confidence factors, and run metadata.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="records">
+        <h2>Records in Plain English</h2>
+        <p>Each record answers one question. If a field does not help answer that question, it probably belongs somewhere else.</p>
+        <div class="contracts">
+          <article class="contract-card">
+            <span class="tag">Input</span>
+            <h3><code>InventorySnapshot</code></h3>
+            <p>What is physically and operationally true for this SKU in this store right now?</p>
+            <ul>
+              <li>Store, SKU, product name, category</li>
+              <li>On hand, reserved, and on order units</li>
+              <li>Age, lead time, minimum stock, case pack</li>
+            </ul>
+          </article>
+
+          <article class="contract-card">
+            <span class="tag">Input</span>
+            <h3><code>SalesDaily</code></h3>
+            <p>How many units sold on a specific business date?</p>
+            <ul>
+              <li>One row per store, SKU, and date</li>
+              <li>Zero-sales days must still be present</li>
+              <li>Missing days mean incomplete evidence</li>
+            </ul>
+          </article>
+
+          <article class="contract-card">
+            <span class="tag">Output</span>
+            <h3><code>Recommendation</code></h3>
+            <p>What should the business review, and what evidence supports it?</p>
+            <ul>
+              <li>Type: slow mover, reorder, or clearance</li>
+              <li>Decision, action, evidence, and reasoning</li>
+              <li>Confidence score with explainable factors</li>
+            </ul>
+          </article>
+
+          <article class="contract-card">
+            <span class="tag">Output</span>
+            <h3><code>RunMetadata</code></h3>
+            <p>What happened during the whole run?</p>
+            <ul>
+              <li>Store, as-of date, status, and policy version</li>
+              <li>Input and output counts</li>
+              <li>Freshness, model usage, warnings, and errors</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="policies">
+        <h2>Three Policy Decisions</h2>
+        <p>These are intentionally simple for Phase 1. The goal is trustworthy behavior before smarter behavior.</p>
+        <div class="policy-grid">
+          <article class="policy slow">
+            <h3>Slow Mover</h3>
+            <p>Flags stock that is moving slowly enough to deserve attention.</p>
+            <ul>
+              <li>28-day units sold are at or below 4, or days of supply is at least 60.</li>
+              <li>Sellable stock must be at least 5 units.</li>
+              <li>Sales history must be complete.</li>
+            </ul>
+          </article>
+
+          <article class="policy reorder">
+            <h3>Reorder</h3>
+            <p>Flags stock that is at or below the reorder point.</p>
+            <ul>
+              <li>Default lead time is 7 days.</li>
+              <li>Safety stock is 3 days of demand, with a 2-unit floor when demand exists.</li>
+              <li>Reorder quantity rounds up to the case pack.</li>
+            </ul>
+          </article>
+
+          <article class="policy clearance">
+            <h3>Clearance</h3>
+            <p>Flags older excess stock for markdown review.</p>
+            <ul>
+              <li>Inventory age must be at least 45 days.</li>
+              <li>Days of supply must be at least 45, or demand must be zero.</li>
+              <li>Markdown bands are 10%, 20%, and 30%.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="formulas">
+        <div class="two-col">
+          <div>
+            <h2>Core Formulas</h2>
+            <p>The formulas are the real decision engine. The agent explains them, but it does not get to replace them.</p>
+            <div class="formula-stack">
+              <div class="formula"><code>average_daily_sales = units_sold_lookback / 28</code></div>
+              <div class="formula"><code>sellable_units = max(on_hand_units - reserved_units, 0)</code></div>
+              <div class="formula"><code>inventory_position_units = sellable_units + on_order_units</code></div>
+              <div class="formula"><code>days_of_supply = sellable_units / average_daily_sales</code></div>
+              <div class="formula"><code>reorder_point = max(minimum_stock, ceil(avg_sales * lead_time + safety_stock))</code></div>
+            </div>
+          </div>
+
+          <aside class="panel" aria-label="Why deterministic calculations matter">
+            <h3>Why this matters</h3>
+            <ul class="plain">
+              <li><span class="badge">1</span><span>The output can be tested against known fixture cases.</span></li>
+              <li><span class="badge">2</span><span>Business reviewers can trace every recommendation back to evidence.</span></li>
+              <li><span class="badge">3</span><span>The LLM adds clarity, not hidden business logic.</span></li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section id="calculator">
+        <h2>Try a Scenario</h2>
+        <p>Change the sample SKU values and watch how the Phase 1 rules respond. This is a teaching model of the contract, not production code.</p>
+        <div class="calculator">
+          <div class="panel controls">
+            <label>
+              Units sold in 28 days
+              <input id="sold" type="range" min="0" max="80" value="4">
+              <span class="range-row"><span>0</span><span id="soldValue">4</span><span>80</span></span>
+            </label>
+
+            <label>
+              Sellable units
+              <input id="sellable" type="range" min="0" max="120" value="18">
+              <span class="range-row"><span>0</span><span id="sellableValue">18</span><span>120</span></span>
+            </label>
+
+            <label>
+              On order units
+              <input id="onOrder" type="range" min="0" max="80" value="0">
+              <span class="range-row"><span>0</span><span id="onOrderValue">0</span><span>80</span></span>
+            </label>
+
+            <label>
+              Inventory age in days
+              <input id="age" type="range" min="0" max="160" value="64">
+              <span class="range-row"><span>0</span><span id="ageValue">64</span><span>160</span></span>
+            </label>
+          </div>
+
+          <div class="panel">
+            <div class="results">
+              <div class="result">
+                <strong id="avgSales">0.14</strong>
+                <p>Average daily sales</p>
+              </div>
+              <div class="result">
+                <strong id="daysSupply">126</strong>
+                <p>Days of supply</p>
+              </div>
+              <div class="result">
+                <strong id="reorderPoint">3</strong>
+                <p>Reorder point units</p>
+              </div>
+              <div class="result">
+                <strong id="markdown">20%</strong>
+                <p>Suggested markdown if clearance qualifies</p>
+              </div>
+            </div>
+            <div class="decision" id="decisionBox">
+              <strong id="decisionTitle">Clearance candidate</strong>
+              <span id="decisionText">This SKU has old inventory and excess days of supply.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="outputs">
+        <h2>What Gets Written</h2>
+        <p>The MVP writes machine-readable files first. CSV is an export view, not the source of truth.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Purpose</th>
+              <th>Review focus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>recommendations.json</code></td>
+              <td>Full run envelope with metadata and recommendation records.</td>
+              <td>Can every recommendation be validated against schema and evidence?</td>
+            </tr>
+            <tr>
+              <td><code>recommendations.csv</code></td>
+              <td>Spreadsheet-friendly export for business review.</td>
+              <td>Are nested evidence fields readable enough, or do we need fixed CSV columns?</td>
+            </tr>
+            <tr>
+              <td><code>run-metadata.json</code></td>
+              <td>Status, counts, freshness, warnings, errors, and model details.</td>
+              <td>Can we tell whether a run succeeded and whether data was fresh?</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="feedback">
+        <h2>Feedback Prompts</h2>
+        <p>These are the decisions most worth reviewing before implementation starts.</p>
+        <div class="feedback-grid">
+          <div class="question">
+            <strong>Are the thresholds believable?</strong>
+            <p>Review 4 units sold, 60 days of supply, 45 inventory-age days, and markdown bands of 10%, 20%, and 30%.</p>
+          </div>
+          <div class="question">
+            <strong>Are the records understandable?</strong>
+            <p>Check whether <code>InventorySnapshot</code>, <code>SalesDaily</code>, <code>Recommendation</code>, and <code>RunMetadata</code> feel like the right boundaries.</p>
+          </div>
+          <div class="question">
+            <strong>Is CSV output specific enough?</strong>
+            <p>The contract currently allows nested evidence as compact JSON strings. That is easy to implement, but less friendly in spreadsheets.</p>
+          </div>
+          <div class="question">
+            <strong>What should count as insufficient data?</strong>
+            <p>The current contract is strict: missing days are not silently treated as zero sales.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class="footer-note">
+          Source: <a href="inventory_mvp_contract.md">inventory_mvp_contract.md</a>. This explainer is documentation only and does not implement agent logic.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const controls = {
+      sold: document.getElementById("sold"),
+      sellable: document.getElementById("sellable"),
+      onOrder: document.getElementById("onOrder"),
+      age: document.getElementById("age")
+    };
+
+    const output = {
+      soldValue: document.getElementById("soldValue"),
+      sellableValue: document.getElementById("sellableValue"),
+      onOrderValue: document.getElementById("onOrderValue"),
+      ageValue: document.getElementById("ageValue"),
+      avgSales: document.getElementById("avgSales"),
+      daysSupply: document.getElementById("daysSupply"),
+      reorderPoint: document.getElementById("reorderPoint"),
+      markdown: document.getElementById("markdown"),
+      decisionBox: document.getElementById("decisionBox"),
+      decisionTitle: document.getElementById("decisionTitle"),
+      decisionText: document.getElementById("decisionText")
+    };
+
+    function ceil(value) {
+      return Math.ceil(value);
+    }
+
+    function chooseMarkdown(age, daysSupply, avgSales) {
+      if (age >= 90 || daysSupply >= 120) return 0.30;
+      if (age >= 60 || daysSupply >= 75 || (avgSales === 0 && age >= 45)) return 0.20;
+      if (age >= 45 || daysSupply >= 45) return 0.10;
+      return 0;
+    }
+
+    function updateScenario() {
+      const sold = Number(controls.sold.value);
+      const sellable = Number(controls.sellable.value);
+      const onOrder = Number(controls.onOrder.value);
+      const age = Number(controls.age.value);
+
+      const avgSales = sold / 28;
+      const daysSupply = avgSales > 0 ? sellable / avgSales : (sellable > 0 ? Infinity : 0);
+      const safetyStock = avgSales > 0 ? Math.max(2, ceil(avgSales * 3)) : 0;
+      const reorderPoint = Math.max(3, ceil(avgSales * 7 + safetyStock));
+      const inventoryPosition = sellable + onOrder;
+      const markdown = chooseMarkdown(age, daysSupply, avgSales);
+
+      const slowMover = sellable >= 5 && (sold <= 4 || daysSupply >= 60);
+      const reorder = inventoryPosition <= reorderPoint;
+      const clearance = sellable >= 5 && age >= 45 && (daysSupply >= 45 || avgSales === 0);
+
+      output.soldValue.textContent = sold;
+      output.sellableValue.textContent = sellable;
+      output.onOrderValue.textContent = onOrder;
+      output.ageValue.textContent = age;
+      output.avgSales.textContent = avgSales.toFixed(2);
+      output.daysSupply.textContent = Number.isFinite(daysSupply) ? Math.round(daysSupply) : "No sales";
+      output.reorderPoint.textContent = reorderPoint;
+      output.markdown.textContent = markdown > 0 ? `${Math.round(markdown * 100)}%` : "None";
+
+      if (reorder) {
+        output.decisionBox.style.background = "#b91c1c";
+        output.decisionTitle.textContent = "Reorder candidate";
+        output.decisionText.textContent = "Inventory position is at or below the calculated reorder point.";
+      } else if (clearance) {
+        output.decisionBox.style.background = "#15803d";
+        output.decisionTitle.textContent = "Clearance candidate";
+        output.decisionText.textContent = "This SKU has old inventory and excess days of supply.";
+      } else if (slowMover) {
+        output.decisionBox.style.background = "#b45309";
+        output.decisionTitle.textContent = "Slow-mover candidate";
+        output.decisionText.textContent = "Sales are low or supply is high enough to deserve review.";
+      } else {
+        output.decisionBox.style.background = "#172033";
+        output.decisionTitle.textContent = "No action";
+        output.decisionText.textContent = "The sample SKU does not cross the Phase 1 thresholds.";
+      }
+    }
+
+    Object.values(controls).forEach((control) => {
+      control.addEventListener("input", updateScenario);
+    });
+
+    updateScenario();
+  </script>
+</body>
+</html>
