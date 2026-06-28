@@ -4,8 +4,8 @@ An agentic business-intelligence portfolio project for retail grocery inventory 
 
 ## Team
 
-- **Srivatsan Rangarajan** — agent logic, LlamaIndex orchestration, MCP servers, and recommendation quality
-- **Beula** — data infrastructure, DynamoDB and PostgreSQL/pgvector, parallel ETL, Slack, and dashboard integrations
+- **Srivatsan Rangarajan** ([@Sriva29](https://github.com/Sriva29)) — agent logic, LlamaIndex orchestration, MCP servers, and recommendation quality
+- **Beula** ([@BeulaEvangelin](https://github.com/BeulaEvangelin)) — data infrastructure, DynamoDB and PostgreSQL/pgvector, parallel ETL, Slack, and dashboard integrations
 
 ## Project plan
 
@@ -18,7 +18,7 @@ The phased architecture, named ownership, acceptance criteria, and zero-cost set
 - **GitHub Project** visualizes issue flow: Backlog → Ready → In progress → In review → Done. It is a planning view, not a second task list.
 - **PROJECT_BRIEF.md** holds architecture decisions, phase goals, and the larger delivery plan. Update it through a pull request when the project direction changes.
 
-When Beula has been added as a repository collaborator, assign her Phase 1 issues to her GitHub account rather than using name labels or checklists in the README.
+Beula’s Phase 1 issues are assigned directly to her GitHub account, so ownership lives in GitHub Issues rather than in duplicated README checklists.
 
 ## Stack
 

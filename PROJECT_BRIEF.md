@@ -13,8 +13,8 @@ The differentiators are deliberately visible in the product:
 
 | Builder | Primary responsibility |
 | --- | --- |
-| Srivatsan Rangarajan | Agent logic, LlamaIndex orchestration, MCP servers, structured recommendations, and evaluation |
-| Beula | DynamoDB and PostgreSQL/pgvector, ETL, data quality, Slack, and dashboard integrations |
+| Srivatsan Rangarajan ([@Sriva29](https://github.com/Sriva29)) | Agent logic, LlamaIndex orchestration, MCP servers, structured recommendations, and evaluation |
+| Beula ([@BeulaEvangelin](https://github.com/BeulaEvangelin)) | DynamoDB and PostgreSQL/pgvector, ETL, data quality, Slack, and dashboard integrations |
 
 ### Scope guardrails
 
